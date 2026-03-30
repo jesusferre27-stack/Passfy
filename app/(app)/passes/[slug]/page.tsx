@@ -139,7 +139,7 @@ export default async function PassDetailPage({ params }: { params: { slug: strin
       </main>
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-pf-surface-highest/80 backdrop-blur-xl border-t border-pf-outline-var/20 z-40 max-w-md mx-auto">
+      <div className="fixed bottom-[72px] left-0 right-0 p-4 bg-pf-surface-highest/80 backdrop-blur-xl border-t border-pf-outline-var/20 z-40 max-w-md mx-auto rounded-t-2xl">
         {alreadyOwned ? (
           <div className="bg-pf-secondary-ctn/10 border border-pf-secondary-ctn rounded-2xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
