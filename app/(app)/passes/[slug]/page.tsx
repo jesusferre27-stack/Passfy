@@ -156,7 +156,7 @@ export default async function PassDetailPage({ params }: { params: { slug: strin
         ) : (
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs text-pf-on-surface-var font-semibold uppercase tracking-wider">Pago único mensual</p>
+              <p className="text-xs text-pf-on-surface-var font-semibold uppercase tracking-wider">Pago único</p>
               <p className="text-2xl font-bold font-mono text-pf-on-surface">{formatMXNShort(pass.precio)}</p>
             </div>
             <Link href={`/checkout/${pass.slug}`} className="flex-1">
