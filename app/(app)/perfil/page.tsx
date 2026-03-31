@@ -8,22 +8,14 @@ import { useUserStore } from '@/store/useUserStore'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { PWAInstallButton } from '@/components/PWAInstallButton'
 
 export default function ProfilePage() {
   const router = useRouter()
   const { user, isLoading, signOut, fetchProfile } = useUserStore()
   const [activePassesCount, setActivePassesCount] = React.useState<number | null>(null)
   const [affiliateCode, setAffiliateCode] = React.useState<string | null>(null)
-  const [deferredPrompt, setDeferredPrompt] = React.useState<any>(null)
 
-  React.useEffect(() => {
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault()
-      setDeferredPrompt(e)
-    }
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-  }, [])
 
   React.useEffect(() => {
     if (!user) {
@@ -76,7 +68,8 @@ export default function ProfilePage() {
     
     const { error } = await supabase.from('affiliates').insert({
       user_id: user.id,
-      codigo_afiliado: newCode
+      codigo_afiliado: newCode,
+      comision_pct: 15
     })
     
     if (error) {
@@ -84,21 +77,12 @@ export default function ProfilePage() {
       toast.error('Hubo un error al crear tu cuenta.', { id: toastId })
     } else {
       setAffiliateCode(newCode)
-      toast.success('¡Felicidades! Ahora eres un afiliado.', { id: toastId })
+      toast.success('¡Bienvenido al programa!', { id: toastId })
+      router.push('/afiliado')
     }
   }
 
-  const handleInstallPWA = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null)
-      }
-    } else {
-      toast.info('Abre esta página en Chrome para instalarla')
-    }
-  }
+
 
 
   return (
@@ -160,7 +144,7 @@ export default function ProfilePage() {
               >
                 <LinkIcon size={16} /> Copiar mi enlace
               </button>
-              <Link href="/afiliados" className="flex items-center justify-center bg-pf-surface-highest text-pf-on-surface hover:bg-pf-surface-top px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors border border-pf-surface-high">
+              <Link href="/afiliado" className="flex items-center justify-center bg-pf-surface-highest text-pf-on-surface hover:bg-pf-surface-top px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors border border-pf-surface-high">
                 Panel
               </Link>
             </div>
@@ -192,12 +176,7 @@ export default function ProfilePage() {
             <ChevronRight className="text-pf-on-surface-var w-5 h-5" />
           </Link>
           
-          <button onClick={handleInstallPWA} className="w-full flex items-center justify-between p-4 hover:bg-pf-surface-top transition-colors">
-             <div className="flex items-center gap-3">
-              <Download className="text-pf-on-surface-var w-5 h-5" />
-              <span className="font-medium text-sm">Instalar App (PWA)</span>
-            </div>
-          </button>
+          <PWAInstallButton />
         </div>
 
         {/* Cerrar sesión */}

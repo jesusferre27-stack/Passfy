@@ -28,9 +28,14 @@ export async function POST(req: Request) {
 
     if (!pass) return NextResponse.json({ error: 'Pass no encontrado' }, { status: 404 })
 
-    // 3. Procesar pago en Mercado Pago
-    const payment = new Payment(client)
-    const result = await payment.create({
+    // 3. Obtener cookie de afiliado para el metadata
+    const refCookie = req.headers.get('cookie')?.split(';').find(c => c.trim().startsWith('affiliate_ref='))
+    const affiliateCode = refCookie ? refCookie.split('=')[1] : null
+
+    // 4. Procesar pago en Mercado Pago
+    const payment = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! })
+    const prefPayment = new Payment(client)
+    const result = await prefPayment.create({
       body: {
         transaction_amount: pass.precio,
         token: paymentData.token,
@@ -43,6 +48,11 @@ export async function POST(req: Request) {
           identification: paymentData.payer?.identification
         },
         external_reference: `${user.id}_${passId}`,
+        metadata: {
+          user_id: user.id,
+          pass_id: passId,
+          affiliate_code: affiliateCode
+        }
         // Configurar webhook url si es necesario
       }
     })
@@ -83,21 +93,7 @@ export async function POST(req: Request) {
       await supabase.from('benefit_uses').insert(benefitUsesData)
     }
 
-    // 6. Afiliados
-    const refCookie = req.headers.get('cookie')?.split(';').find(c => c.trim().startsWith('pf_ref='))
-    if (refCookie) {
-      const code = refCookie.split('=')[1]
-      const { data: affiliate } = await supabase.from('affiliates').select('id, comision_pct').eq('codigo_afiliado', code).single()
-      if (affiliate) {
-        const comisionAgreed = (pass.precio * affiliate.comision_pct) / 100
-        await supabase.from('affiliate_sales').insert({
-          affiliate_id: affiliate.id,
-          user_pass_id: userPass.id,
-          monto: pass.precio,
-          comision: comisionAgreed
-        })
-      }
-    }
+    // Eliminado bloque obsoleto de Afiliados, movido a webhook.
 
     // 7. Enviar Mail
     const { data: profile } = await supabase.from('users').select('nombre, email').eq('id', user.id).single()

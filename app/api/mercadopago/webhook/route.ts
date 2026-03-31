@@ -75,6 +75,28 @@ export async function POST(req: Request) {
             })
           }
         }
+        
+        // Tracking de afiliado via webhook metadata
+        if (paymentInfo.metadata && paymentInfo.metadata.affiliate_code) {
+           const code = paymentInfo.metadata.affiliate_code;
+           if (code) {
+             const { data: affiliate } = await supabase.from('affiliates').select('id, comision_pct').eq('codigo_afiliado', code).single();
+             if (affiliate && userPass) {
+                const { count } = await supabase.from('affiliate_sales').select('*', { count: 'exact', head: true }).eq('user_pass_id', userPass.id);
+                if (count === 0) {
+                   const monto = userPass.passes?.precio || 199;
+                   const comision = (monto * affiliate.comision_pct) / 100;
+                   await supabase.from('affiliate_sales').insert({
+                     affiliate_id: affiliate.id,
+                     user_pass_id: userPass.id,
+                     monto: monto,
+                     comision: comision,
+                     pagado: false
+                   });
+                }
+             }
+           }
+        }
       }
     }
 

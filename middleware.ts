@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
   // Guardar cookie de afiliado si ?ref=CODIGO está en la URL
   const refCode = request.nextUrl.searchParams.get('ref')
   if (refCode) {
-    supabaseResponse.cookies.set('pf_ref', refCode, {
+    supabaseResponse.cookies.set('affiliate_ref', refCode, {
       maxAge: 60 * 60 * 24 * 30, // 30 días
       path: '/',
       sameSite: 'lax',
