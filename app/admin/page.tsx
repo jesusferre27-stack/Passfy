@@ -9,7 +9,12 @@ export const metadata = { title: 'PASSFY Admin — Platform Management' }
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+
+  // Doble protección: middleware + server component
+  const adminEmail = process.env.ADMIN_EMAIL
+  if (!user || !adminEmail || user.email !== adminEmail) {
+    redirect('/')
+  }
 
   const admin = createAdminClient()
 

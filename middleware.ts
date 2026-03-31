@@ -60,11 +60,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/wallet', request.url))
   }
 
-  // Admin protegido
+  // Admin protegido — solo el email definido en ADMIN_EMAIL
   if (pathname.startsWith('/admin')) {
-    // Verificar rol admin (se verifica en el componente también)
-    if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
+    const adminEmail = process.env.ADMIN_EMAIL
+    if (!user || !adminEmail || user.email !== adminEmail) {
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
