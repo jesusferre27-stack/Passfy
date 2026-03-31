@@ -49,11 +49,15 @@ export default function AffiliatePanelPage() {
 
         if (!statsRes.ok) {
            if (statsRes.status === 404) {
-             // No es afiliado
              router.push('/perfil')
              return
            }
-           throw new Error('Error al cargar stats')
+           const errBody = await statsRes.json().catch(()=>({}))
+           throw new Error(errBody.error || `Error stats ${statsRes.status}`)
+        }
+        if (!salesRes.ok) {
+           const errBody = await salesRes.json().catch(()=>({}))
+           throw new Error(errBody.error || `Error sales ${salesRes.status}`)
         }
 
         const statsData = await statsRes.json()
@@ -62,7 +66,8 @@ export default function AffiliatePanelPage() {
         setStats(statsData)
         setSales(salesData.sales || [])
       } catch (err: any) {
-        toast.error(err.message || 'Error al cargar panel')
+        toast.error(`Error de panel: ${err.message}`)
+        router.push('/perfil')
       } finally {
         setLoading(false)
       }

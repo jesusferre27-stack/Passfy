@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 export async function GET(req: Request) {
   try {
@@ -10,8 +10,10 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    // Buscar afiliado
-    const { data: affiliate } = await supabase
+    const supabaseAdmin = createAdminClient()
+
+    // Buscar afiliado (bypass RLS)
+    const { data: affiliate } = await supabaseAdmin
       .from('affiliates')
       .select('id')
       .eq('user_id', user.id)
@@ -21,8 +23,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Usuario no es afiliado' }, { status: 404 })
     }
 
-    // Obtener últimas 20 ventas
-    const { data: sales, error } = await supabase
+    // Obtener últimas 20 ventas (bypass RLS)
+    const { data: sales, error } = await supabaseAdmin
       .from('affiliate_sales')
       .select(`
         id, 
