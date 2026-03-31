@@ -11,9 +11,15 @@ import { Skeleton } from '@/components/ui/Skeleton'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, isLoading, signOut } = useUserStore()
+  const { user, isLoading, signOut, fetchProfile } = useUserStore()
   const [activePassesCount, setActivePassesCount] = React.useState<number | null>(null)
   const [affiliateCode, setAffiliateCode] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    if (!user) {
+      fetchProfile()
+    }
+  }, [user, fetchProfile])
 
   React.useEffect(() => {
     async function loadData() {
