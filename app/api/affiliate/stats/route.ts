@@ -26,7 +26,7 @@ export async function GET(req: Request) {
     // Obtener TODAS las ventas del afiliado para calcular
     const { data: sales, error } = await supabaseAdmin
       .from('affiliate_sales')
-      .select('created_at, comision, pagado')
+      .select('fecha, comision, pagado')
       .eq('affiliate_id', affiliate.id)
 
     if (error) throw error
@@ -49,8 +49,8 @@ export async function GET(req: Request) {
 
     const oneWeekMs = 7 * 24 * 60 * 60 * 1000
 
-    sales?.forEach(sale => {
-      const saleDate = new Date(sale.created_at)
+    sales?.forEach((sale: any) => {
+      const saleDate = new Date(sale.fecha)
 
       // Ventas este mes
       if (saleDate >= firstDayOfMonth) {
