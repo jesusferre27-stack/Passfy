@@ -55,6 +55,30 @@ export default function ProfilePage() {
     toast.success('Enlace de afiliado copiado al portapapeles', { description: link })
   }
 
+  const handleCreateAffiliate = async () => {
+    if (!user) return
+    const toastId = toast.loading('Creando tu cuenta de afiliado...')
+    const supabase = createClient()
+    
+    const random4 = Math.floor(1000 + Math.random() * 9000)
+    const cleanName = (user.nombre || 'USER').split(' ')[0].toUpperCase().replace(/[^A-Z]/g, '') || 'USER'
+    const newCode = `REF-${cleanName}-${random4}`
+    
+    const { error } = await supabase.from('affiliates').insert({
+      user_id: user.id,
+      codigo_afiliado: newCode
+    })
+    
+    if (error) {
+      console.error(error)
+      toast.error('Hubo un error al crear tu cuenta.', { id: toastId })
+    } else {
+      setAffiliateCode(newCode)
+      toast.success('¡Felicidades! Ahora eres un afiliado.', { id: toastId })
+    }
+  }
+
+
   return (
     <div className="min-h-screen bg-pf-bg pt-safe pb-24">
       <header className="px-6 pt-8 pb-4 sticky top-0 bg-pf-bg/80 backdrop-blur-xl z-10 border-b border-pf-surface-highest">
@@ -119,7 +143,10 @@ export default function ProfilePage() {
               </Link>
             </div>
           ) : (
-            <button className="w-full bg-pf-primary-ctn text-white font-semibold py-2.5 rounded-xl shadow-pf-glow transition-transform active:scale-95 text-sm">
+            <button 
+              onClick={handleCreateAffiliate}
+              className="w-full bg-pf-primary-ctn text-white font-semibold py-2.5 rounded-xl shadow-pf-glow transition-transform active:scale-95 text-sm"
+            >
               Convertirme en Afiliado
             </button>
           )}
