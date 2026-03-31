@@ -40,24 +40,29 @@ export default function AffiliatePanelPage() {
       return
     }
 
-    async function loadAffiliateData() {
+    async function loadAffiliateData(retryAfterCreate = false) {
       try {
-        const [statsRes, salesRes] = await Promise.all([
-          fetch('/api/affiliate/stats'),
-          fetch('/api/affiliate/sales')
-        ])
+        const statsRes = await fetch('/api/affiliate/stats')
 
         if (!statsRes.ok) {
-           if (statsRes.status === 404) {
-             router.push('/perfil')
-             return
+           if (statsRes.status === 404 && !retryAfterCreate) {
+             // No existe registro de afiliado — crearlo automáticamente
+             const createRes = await fetch('/api/affiliate/create', { method: 'POST' })
+             if (!createRes.ok) {
+               const createBody = await createRes.json().catch(() => ({}))
+               throw new Error(createBody.error || 'No se pudo crear el registro de afiliado')
+             }
+             // Reintentar con el nuevo registro
+             return loadAffiliateData(true)
            }
-           const errBody = await statsRes.json().catch(()=>({}))
-           throw new Error(errBody.error || `Error stats ${statsRes.status}`)
+           const errBody = await statsRes.json().catch(() => ({}))
+           throw new Error(errBody.error || `Error stats: ${statsRes.status}`)
         }
+
+        const salesRes = await fetch('/api/affiliate/sales')
         if (!salesRes.ok) {
-           const errBody = await salesRes.json().catch(()=>({}))
-           throw new Error(errBody.error || `Error sales ${salesRes.status}`)
+           const errBody = await salesRes.json().catch(() => ({}))
+           throw new Error(errBody.error || `Error sales: ${salesRes.status}`)
         }
 
         const statsData = await statsRes.json()
@@ -66,7 +71,7 @@ export default function AffiliatePanelPage() {
         setStats(statsData)
         setSales(salesData.sales || [])
       } catch (err: any) {
-        toast.error(`Error de panel: ${err.message}`)
+        toast.error(`Error: ${err.message}`)
         router.push('/perfil')
       } finally {
         setLoading(false)
