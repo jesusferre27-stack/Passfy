@@ -14,6 +14,16 @@ export default function ProfilePage() {
   const { user, isLoading, signOut, fetchProfile } = useUserStore()
   const [activePassesCount, setActivePassesCount] = React.useState<number | null>(null)
   const [affiliateCode, setAffiliateCode] = React.useState<string | null>(null)
+  const [deferredPrompt, setDeferredPrompt] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+    }
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+  }, [])
 
   React.useEffect(() => {
     if (!user) {
@@ -75,6 +85,18 @@ export default function ProfilePage() {
     } else {
       setAffiliateCode(newCode)
       toast.success('¡Felicidades! Ahora eres un afiliado.', { id: toastId })
+    }
+  }
+
+  const handleInstallPWA = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null)
+      }
+    } else {
+      toast.info('Abre esta página en Chrome para instalarla')
     }
   }
 
@@ -170,7 +192,7 @@ export default function ProfilePage() {
             <ChevronRight className="text-pf-on-surface-var w-5 h-5" />
           </Link>
           
-          <button className="w-full flex items-center justify-between p-4 hover:bg-pf-surface-top transition-colors">
+          <button onClick={handleInstallPWA} className="w-full flex items-center justify-between p-4 hover:bg-pf-surface-top transition-colors">
              <div className="flex items-center gap-3">
               <Download className="text-pf-on-surface-var w-5 h-5" />
               <span className="font-medium text-sm">Instalar App (PWA)</span>
