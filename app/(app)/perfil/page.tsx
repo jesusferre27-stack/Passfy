@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { LogOut, User, ChevronRight, Settings, ShieldQuestion, HeartHandshake, Link as LinkIcon, Download } from 'lucide-react'
+import { LogOut, User, ChevronRight, Settings, ShieldQuestion, HeartHandshake, Link as LinkIcon, Download, LayoutDashboard } from 'lucide-react'
 import { useUserStore } from '@/store/useUserStore'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -170,6 +170,16 @@ export default function ProfilePage() {
             </div>
             <ChevronRight className="text-pf-on-surface-var w-5 h-5" />
           </Link>
+
+          {user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+            <Link href="/admin" className="flex items-center justify-between p-4 hover:bg-pf-surface-top transition-colors">
+              <div className="flex items-center gap-3">
+                <LayoutDashboard className="text-[#ff535b] w-5 h-5" />
+                <span className="font-medium text-sm text-[#ff535b]">Panel Admin</span>
+              </div>
+              <ChevronRight className="text-[#ff535b] w-5 h-5" />
+            </Link>
+          )}
           
           <PWAInstallButton />
         </div>
