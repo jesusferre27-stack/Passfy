@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { nanoid } from 'nanoid' // Usaré una lib externa o simplemente Math.random si no está instalada, pero mejor algo nativo para no instalar más
