@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 import { Toaster } from 'sonner'
 import './globals.css'
 

@@ -60,25 +60,20 @@ export default function ProfilePage() {
   const handleCreateAffiliate = async () => {
     if (!user) return
     const toastId = toast.loading('Creando tu cuenta de afiliado...')
-    const supabase = createClient()
-    
-    const random4 = Math.floor(1000 + Math.random() * 9000)
-    const cleanName = (user.nombre || 'USER').split(' ')[0].toUpperCase().replace(/[^A-Z]/g, '') || 'USER'
-    const newCode = `REF-${cleanName}-${random4}`
-    
-    const { error } = await supabase.from('affiliates').insert({
-      user_id: user.id,
-      codigo_afiliado: newCode,
-      comision_pct: 15
-    })
-    
-    if (error) {
-      console.error(error)
-      toast.error('Hubo un error al crear tu cuenta.', { id: toastId })
-    } else {
-      setAffiliateCode(newCode)
+    try {
+      const res = await fetch('/api/affiliate/create', { method: 'POST' })
+      const data = await res.json()
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Error al crear tu cuenta.')
+      }
+
+      setAffiliateCode(data.affiliate.codigo_afiliado)
       toast.success('¡Bienvenido al programa!', { id: toastId })
       router.push('/afiliado')
+    } catch (err: any) {
+      console.error(err)
+      toast.error(`Error: ${err.message}`, { id: toastId })
     }
   }
 
